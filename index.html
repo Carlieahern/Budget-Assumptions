@@ -779,7 +779,21 @@ function lockAdmin() {
   document.getElementById('admin-pw-err').textContent='';
   switchMainTab('programs');
 }
-function renderAdminTab() {
+function logoutUser() {
+  if(adminUnlocked) lockAdmin();
+  currentUser = { name: '', dept: '', email: '' };
+  document.getElementById('w-name').value = '';
+  document.getElementById('w-dept').value = '';
+  document.getElementById('w-email').value = '';
+  document.getElementById('w-app-password').value = '';
+  document.getElementById('w-pw-err').style.display = 'none';
+  document.getElementById('w-err').style.display = 'none';
+  document.getElementById('welcome-password-screen').style.display = 'none';
+  document.getElementById('welcome-screen').style.display = 'flex';
+  logActivity('Logout', '', 'User logged out');
+  activityLogCache = [];
+}
+  function renderAdminTab() {
   if(!adminUnlocked){document.getElementById('admin-login-screen').style.display='block';document.getElementById('admin-content').style.display='none';}
   else{renderRequests();renderCompleted();loadAdminQuestions();}
 }
