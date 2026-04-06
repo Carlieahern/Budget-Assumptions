@@ -680,8 +680,7 @@ function renderProgramTable() {
   body.innerHTML=filtered.map(p=>{
     const status=(p.status||'').toLowerCase();
     let actionBtn;
-    if(status==='verified') actionBtn=`<span class="badge badge-verified">&#10003; Verified</span>`;
-    else if(status==='in progress') actionBtn=`<span class="badge badge-progress">&#9679; Submitted</span>`;
+if(status==='verified') actionBtn=`<span class="badge badge-verified">&#10003; Verified</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;    else if(status==='in progress') actionBtn=`<span class="badge badge-progress">&#9679; Submitted</span>`;
     else if(status==='new') actionBtn=`<span class="badge badge-new">&#10010; Submitted</span>`;
     else if(status==='deleted') actionBtn=`<span class="badge badge-deleted">&#128465; Pending Deletion</span>`;
     else actionBtn=`<button class="verify-btn" onclick="openVerifyModal(${p.id})">&#10003; Verify Now</button>`;
@@ -812,8 +811,8 @@ function renderCompleted() {
       <span class="badge badge-verified">&#10003; Verified</span>
     </div>
     <div class="req-actions" style="margin-top:8px">
-      <button class="btn-recall" onclick="recallVerified(${p.id})">&#8630; Recall for Reverification</button>
-    </div></div>`).join('');
+<button class="btn-cancel" onclick="viewVerifiedDetails(${p.id})" style="color:#2D5BE3;border-color:#2D5BE3">&#128203; View Details</button>
+<button class="btn-recall" onclick="recallVerified(${p.id})">&#8630; Recall for Reverification</button>    </div></div>`).join('');
   const deletedHtml=allPrev.map(p=>`<div class="req-card" style="margin-bottom:8px;border-color:#F3EEFF">
     <div class="req-card-header">
       <div><div class="req-card-title">${p.name}</div><div class="req-card-meta">${p.department}${p.archivedDate?' &bull; Deleted '+p.archivedDate:''}</div></div>
@@ -1394,6 +1393,29 @@ function viewProgramDetails(idx){
   }).join('');
   document.getElementById('details-modal-title').textContent=p.name;
   document.getElementById('details-modal-body').innerHTML=`<table style="width:100%;border-collapse:collapse">${rowsHtml}</table>`;
+  document.getElementById('details-modal').classList.add('open');
+}
+  function viewVerifiedDetails(progId) {
+  const p = programs.find(pr => pr.id === progId);
+  if (!p) return;
+  const rows = [
+    ['Program Name',p.name],['Department',p.department],['Program Owner',p.owner],
+    ['Elective/Non-Elective',p.elective],['Last Verified',p.lastVerified||'Never'],
+    ['─── Cost Details ───',''],['Cost of Program',p.costOfProgram],
+    ['Cost Basis',p.costBasis],['Billing Frequency',p.billingFrequency],
+    ['Billing Start Month',p.billingStartMonth],['Minimum',p.minimum||'—'],['Maximum',p.maximum||'—'],
+    ['─── GL Codes ───',''],['Yardi GL',p.yardiGL],['OneSite GL',p.onesiteGL],['Pace GL',p.paceGL],
+    ['─── Setup Fee ───',''],['Has Setup Fee',p.hasSetupFee?'Yes':'No'],
+    ['Fee Name',p.setupFeeName||'—'],['Fee Cost',p.setupFeeCost||'—'],
+    ['Fee Basis',p.setupFeeBasis||'—'],['Fee Month',p.setupFeeMonth||'—'],
+    ['─── Additional ───',''],['Details',p.details||'—'],
+  ];
+  const rowsHtml = rows.map(([label,val]) => {
+    if(label.startsWith('─')) return `<tr><td colspan="2" style="padding:8px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8899BB;background:#F8F9FC;border-bottom:1px solid #E8EEFF">${label.replace(/─/g,'').trim()}</td></tr>`;
+    return `<tr style="border-bottom:1px solid #F0F2F7"><td style="padding:8px 12px;font-size:12px;font-weight:700;color:#555;width:45%;vertical-align:top">${label}</td><td style="padding:8px 12px;font-size:12px;color:#1A1A2E;white-space:pre-wrap">${val||'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('details-modal-title').textContent = p.name + ' — Verified Details';
+  document.getElementById('details-modal-body').innerHTML = `<table style="width:100%;border-collapse:collapse">${rowsHtml}</table>`;
   document.getElementById('details-modal').classList.add('open');
 }
 function closeDetailsModal(){document.getElementById('details-modal').classList.remove('open');}
