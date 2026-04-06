@@ -227,8 +227,8 @@ let glSelectedCat = null;
 let adminUnlocked = false;
 let currentUser = { name: '', dept: '', email: '' };
 let activityLogCache = [];
-<button class="settings-btn" onclick="logoutUser()" style="background:rgba(255,80,80,.15);border-color:rgba(255,100,100,.3);">&#x2192; Log Out</button>
-// ── SETTINGS ─────────────────────────────────────────────────
+
+  // ── SETTINGS ─────────────────────────────────────────────────
 function getSettings() {
   return {
     token: HARDCODED_TOKEN,
@@ -1728,6 +1728,7 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
     </span>
     <span id="last-synced" style="font-size:11px;color:#8899BB"></span>
     <span id="user-greeting" style="font-size:12px;color:#8BB4FF;font-weight:600"></span>
+    <button class="settings-btn" onclick="logoutUser()" style="background:rgba(255,80,80,.15);border-color:rgba(255,100,100,.3);">&#x2192; Log Out</button>
     <button class="settings-btn" onclick="openSettings()">&#9881; Settings</button>
   </div>
 </div>
