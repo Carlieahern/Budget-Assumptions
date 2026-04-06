@@ -481,16 +481,18 @@ async function logActivity(actionType, programName, details, userOverride) {
 
 // ── WELCOME ───────────────────────────────────────────────────
 function adminBypass() {
+  const name = prompt('Enter your name:');
+  if (!name || !name.trim()) return;
   const pw = prompt('Enter admin password:');
   if (pw === ADMIN_PASSWORD) {
-    currentUser = { name: 'Admin', dept: 'Admin', email: 'admin@rpmliving.com' };
+    currentUser = { name: name.trim(), dept: 'Admin', email: 'admin@rpmliving.com' };
     activeDept = DEPTS[0];
     document.getElementById('welcome-screen').style.display = 'none';
-    document.getElementById('user-greeting').textContent = 'Admin';
+    document.getElementById('user-greeting').textContent = name.trim();
     adminUnlocked = true;
     renderDeptTabs(); renderProgramTable(); updateCounts();
     syncStatusesFromMonday();
-    logActivity('Admin Login', '', 'Admin bypassed welcome screen');
+    logActivity('Admin Login', '', 'Admin logged in');
     switchMainTab('admin');
   } else if (pw !== null) { alert('Incorrect password'); }
 }
