@@ -1079,16 +1079,13 @@ function applyActivityFilters(events) {
   const deptFilter = document.getElementById('af-dept')?.value||'';
 
   return events.filter(e => {
-    if (fromDate) {
+    if (fromDate || toDate) {
       const evDate = new Date(e.date);
-      const from = new Date(fromDate);
-      if (evDate < from) return false;
-    }
-    if (toDate) {
-      const evDate = new Date(e.date);
-      const to = new Date(toDate);
-      to.setHours(23,59,59);
-      if (evDate > to) return false;
+      const evDateStr = evDate.getFullYear() + '-' +
+        String(evDate.getMonth()+1).padStart(2,'0') + '-' +
+        String(evDate.getDate()).padStart(2,'0');
+      if (fromDate && evDateStr < fromDate) return false;
+      if (toDate && evDateStr > toDate) return false;
     }
     if (search) {
       const searchStr = (e.userName+' '+e.userDept+' '+e.actionType+' '+e.programName+' '+e.details).toLowerCase();
