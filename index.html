@@ -956,53 +956,42 @@ async function loadActivityLog() {
     let cursor = null;
     do {
       const cursorPart = cursor ? `, cursor: "${cursor}"` : '';
-      const data = await mondayQuery(`{ boards(ids:[${s.activityBoardId}]) { items_page(limit:100${cursorPart}) { cursor items { id name subitems { id name } } } } }`);
+      const data = await mondayQuery(`{ boards(ids:[${s.activityBoardId}]) { items_page(limit:100${cursorPart}) { cursor items { id name subitems { id name column_values { id text } } } } } }`);
       const page = data?.data?.boards?.[0]?.items_page;
       if (!page) break;
       allItems = allItems.concat(page.items || []);
       cursor = page.cursor || null;
     } while (cursor);
 
-    // Parse all subitems into activity records
-    // Subitem name format: "UserName | Department | ActionType | ProgramName | Time"
-    // or: "UserName | Department | ActionType | Time" (no program)
     const allEvents = [];
     allItems.forEach(parentItem => {
-      const dateStr = parentItem.name; // e.g. "April 6, 2026"
+      const dateStr = parentItem.name;
       (parentItem.subitems || []).forEach(sub => {
-        const parts = sub.name.split(' | ');
-        if (parts.length >= 3) {
-          const userName = parts[0] || '';
-          const userDept = parts[1] || '';
-          const actionType = parts[2] || '';
-          let programName = '';
-          let time = '';
-          if (parts.length === 5) {
-            programName = parts[3] || '';
-            time = parts[4] || '';
-          } else if (parts.length === 4) {
-            // Could be program or time - check if last part looks like a time
-            const lastPart = parts[3] || '';
-            if (lastPart.match(/\d+:\d+/)) {
-              time = lastPart;
-            } else {
-              programName = lastPart;
-            }
-          } else {
-            time = parts[parts.length - 1] || '';
-          }
-          allEvents.push({ date: dateStr, time, userName, userDept, actionType, programName, details: '', rawDate: parseDateStr(dateStr) });
+        const getCol = (id) => sub.column_values?.find(cv => cv.id === id)?.text || '';
+        const userName = getCol('text_mm25nn6r') || sub.name.split(' — ')[0] || '';
+        const userDept = getCol('text_mm25pj7p') || '';
+        const userEmail = getCol('text_mm25zszm') || '';
+        const actionType = getCol('text_mm2544gd') || sub.name.split(' — ')[1] || '';
+        const programName = getCol('text_mm25ks77') || '';
+        const details = getCol('text_mm25je0x') || '';
+        const time = getCol('text_mm25vhjm') || '';
+
+        if (userName || actionType) {
+          allEvents.push({
+            date: dateStr,
+            time,
+            userName,
+            userDept,
+            userEmail,
+            actionType,
+            programName,
+            details,
+            rawDate: parseDateStr(dateStr)
+          });
         }
       });
     });
 
-    // Also merge in local cache for events logged this session not yet fetched
-    activityLogCache.forEach(ev => {
-      const alreadyExists = allEvents.find(e => e.userName === ev.userName && e.time === ev.time && e.actionType === ev.actionType);
-      if (!alreadyExists) allEvents.push({...ev, rawDate: parseDateStr(ev.date)});
-    });
-
-    // Sort newest first
     allEvents.sort((a,b) => {
       if (b.rawDate !== a.rawDate) return b.rawDate - a.rawDate;
       return b.time.localeCompare(a.time);
