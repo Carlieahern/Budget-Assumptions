@@ -1314,6 +1314,19 @@ async function submitForm() {
 ];
     changes=fieldMap.filter(([,o,n])=>o!==n).map(([label,o,n])=>({label,old:o,new:n}));
     type=changes.length?'Verification + Updates':'Verification Confirmed';
+    type=changes.length?'Verification + Updates':'Verification Confirmed';
+if(costDiffersVal==='Yes'){
+  currentProgram.yardiCost = yardiCost;
+  currentProgram.onesiteCost = onesiteCost;
+  currentProgram.paceCost = paceCost;
+  currentProgram.costOfProgram = '';
+} else {
+  currentProgram.costOfProgram = cost;
+  currentProgram.yardiCost = '';
+  currentProgram.onesiteCost = '';
+  currentProgram.paceCost = '';
+}
+currentProgram.costDiffers = costDiffersVal==='Yes';
     mondayGroupKey='In Progress';
     currentProgram.status='In Progress'; currentProgram.lastVerified=now;
     requests.push({type,program:currentProgram,submittedBy:owner,date:now,changes,mondayItemId:currentProgram.mondayItemId||null,adminStatus:null});
