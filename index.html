@@ -1310,15 +1310,23 @@ async function submitForm() {
     logActivity('Delete Request', currentProgram.name, 'Deletion requested for '+currentProgram.department);
   } else {
     const fieldMap=[
-      ['Cost of Program',currentProgram.costOfProgram,cost],
-      ['Cost Basis',currentProgram.costBasis,basis],
-      ['Billing Frequency',currentProgram.billingFrequency,freq],
-      ['Billing Start Month',currentProgram.billingStartMonth,billMonth],
-      ['Yardi GL',currentProgram.yardiGL,yardi],
-      ['OneSite GL',currentProgram.onesiteGL,onesite],
-      ['Pace GL',currentProgram.paceGL,pace],
-      ['Details',currentProgram.details,details],
-    ];
+  ['Cost of Program',currentProgram.costOfProgram,cost],
+  ['Cost Basis',currentProgram.costBasis,basis],
+  ['Billing Frequency',currentProgram.billingFrequency,freq],
+  ['Billing Start Month',currentProgram.billingStartMonth,billMonth],
+  ['Yardi GL',currentProgram.yardiGL,yardi],
+  ['OneSite GL',currentProgram.onesiteGL,onesite],
+  ['Pace GL',currentProgram.paceGL,pace],
+  ['Details',currentProgram.details,details],
+  ['Has Setup Fee',String(currentProgram.hasSetupFee),String(hasSetup)],
+  ['Setup Fee Name',currentProgram.setupFeeName,setupName],
+  ['Setup Fee Cost',currentProgram.setupFeeCost,setupCost],
+  ['Setup Fee Basis',currentProgram.setupFeeBasis,setupBasis],
+  ['Setup Fee Month',currentProgram.setupFeeMonth,setupMonth],
+  ['Elective',currentProgram.elective,elective],
+  ['Minimum',currentProgram.minimum,minV],
+  ['Maximum',currentProgram.maximum,maxV],
+];
     changes=fieldMap.filter(([,o,n])=>o!==n).map(([label,o,n])=>({label,old:o,new:n}));
     type=changes.length?'Verification + Updates':'Verification Confirmed';
     mondayGroupKey='In Progress';
