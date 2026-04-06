@@ -421,6 +421,7 @@ async function deleteMondayItem(itemId) {
 }
 
 // ── ACTIVITY LOGGING ──────────────────────────────────────────
+
 async function logActivity(actionType, programName, details, userOverride) {
   const s = getSettings();
   if (!s.token || !s.activityBoardId) return;
@@ -432,16 +433,13 @@ async function logActivity(actionType, programName, details, userOverride) {
   const userDept = user.dept || 'Admin';
   const userEmail = user.email || '';
 
-  // Store locally for immediate display
   activityLogCache.unshift({ date: dateLabel, time: timeLabel, userName, userDept, userEmail, actionType, programName: programName||'', details: details||'' });
 
   try {
-    // Get activity board groups
     const groups = await getActivityBoardGroups();
     const activityGroupId = Object.values(groups)[0];
     if (!activityGroupId) return;
 
-    // Check if a parent item for today already exists
     const existingData = await mondayQuery(`{ boards(ids:[${s.activityBoardId}]) { items_page(limit:50) { items { id name } } } }`);
     const existingItems = existingData?.data?.boards?.[0]?.items_page?.items || [];
     let parentId = null;
@@ -449,27 +447,37 @@ async function logActivity(actionType, programName, details, userOverride) {
     if (existingParent) {
       parentId = existingParent.id;
     } else {
-      // Create parent row for today
       const created = await mondayQuery(`mutation { create_item(board_id: ${s.activityBoardId}, group_id: "${activityGroupId}", item_name: ${JSON.stringify(dateLabel)}) { id } }`);
       parentId = created?.data?.create_item?.id;
     }
 
     if (!parentId) return;
 
-    // Build subitem name and column values
-    const subitemName = `${userName} | ${userDept} | ${actionType}${programName ? ' | ' + programName : ''} | ${timeLabel}`;
     const sanitize = v => String(v||'').replace(/[\n\r]/g,' ').replace(/"/g,"'").trim().substring(0,500);
 
-    // We'll store everything in the subitem name since it's a simple board
-    // But also try to add text columns if they exist on the activity board
-    const subitemQuery = `mutation { create_subitem(parent_item_id: ${parentId}, item_name: ${JSON.stringify(sanitize(subitemName))}) { id } }`;
+    const subitemName = sanitize(userName + ' — ' + actionType + (programName ? ' — ' + programName : ''));
+
+    const cv = {
+      'text_mm25vhjm': sanitize(timeLabel),
+      'text_mm25nn6r': sanitize(userName),
+      'text_mm25pj7p': sanitize(userDept),
+      'text_mm25zszm': sanitize(userEmail),
+      'text_mm2544gd': sanitize(actionType),
+      'text_mm25ks77': sanitize(programName||''),
+      'text_mm25je0x': sanitize(details||'')
+    };
+
+    const cleanCv = {};
+    Object.entries(cv).forEach(([k,v]) => { if(v) cleanCv[k] = v; });
+
+    const subitemQuery = `mutation { create_subitem(parent_item_id: ${parentId}, item_name: ${JSON.stringify(subitemName)}, column_values: ${JSON.stringify(JSON.stringify(cleanCv))}) { id } }`;
     await mondayQuery(subitemQuery);
 
   } catch(e) {
-    // Fail silently — activity log errors must never affect main app
     console.log('Activity log error (non-fatal):', e.message);
   }
 }
+
 
 // ── WELCOME ───────────────────────────────────────────────────
 function adminBypass() {
