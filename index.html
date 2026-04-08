@@ -8,6 +8,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#F0F2F7;color:#1A1A2E;min-height:100vh}
 .app-header{background:#1B2A4A;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .badge-new-verified{background:#E6F9F0;color:#1A7A4A;border:1.5px solid #B8F0D8}
 .app-header h1{color:#fff;font-size:22px;font-weight:700;letter-spacing:-.3px}
 .app-header p{color:#8899BB;font-size:13px;margin-top:3px}
 .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -671,6 +672,7 @@ function statusBadge(status) {
   if(s.includes('needs')) return `<span class="badge badge-needs">&#9679; Needs Verification</span>`;
   if(s.includes('progress')) return `<span class="badge badge-progress">&#9679; In Progress</span>`;
   if(s==='verified') return `<span class="badge badge-verified">&#10003; Verified</span>`;
+  if(s==='new - verified') return `<span class="badge badge-new-verified">&#10010; New - Verified</span>`;
   if(s.includes('deleted')) return `<span class="badge badge-deleted">&#128465; Deleted</span>`;
   return `<span class="badge">${status}</span>`;
 }
@@ -1292,7 +1294,7 @@ async function submitForm() {
   if(isAddMode){
     const newId=programs.length?Math.max(...programs.map(p=>p.id))+1:0;
     const newProg={
-      id:newId,name,department:dept,owner,status:'New',lastVerified:'Never',elective,
+      id:newId,name,department:dept,owner,status:'New',lastVerified:'Never',elective,_isNew:true,
       costOfProgram:cost,costDiffers:costDiffersVal==='Yes',yardiCost,onesiteCost,paceCost,
       costBasis:basis,minimum:minV,maximum:maxV,yardiGL:yardi,onesiteGL:onesite,paceGL:pace,
       billingStartMonth:billMonth,billingFrequency:freq,details,hasSetupFee:hasSetup,
@@ -1467,7 +1469,8 @@ async function approveRequest(idx){
   const r=requests[idx];
   const prog=programs.find(p=>p.id===r.program.id);
   if(prog){
-    prog.status='Verified'; prog.lastVerified=new Date().toLocaleDateString();
+    prog.status = prog._isNew ? 'New - Verified' : 'Verified';
+ prog.lastVerified=new Date().toLocaleDateString();
     if(r.changes) r.changes.forEach(c=>{
       if(c.label==='Cost of Program')prog.costOfProgram=c.new;
       if(c.label==='Cost Basis')prog.costBasis=c.new;
