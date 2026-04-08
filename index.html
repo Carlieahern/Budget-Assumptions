@@ -556,7 +556,7 @@ async function syncStatusesFromMonday() {
       prog.mondayItemId = item.id;
       const groupTitle = item.group?.title || '';
       if (DEPT_GROUPS.includes(groupTitle)) {
-        prog.status = 'Verified';
+        prog.status = prog.status === 'New' ? 'New' : 'Verified';
         const dateCol = item.column_values.find(cv => cv.id === 'text_mm1vwgqc');
         if (dateCol?.text) prog.lastVerified = dateCol.text;
       } else if (groupTitle === 'In Progress') {
@@ -682,7 +682,7 @@ function renderProgramTable() {
     const status=(p.status||'').toLowerCase();
     let actionBtn;
 if(status==='verified') actionBtn=`<span class="badge badge-verified">&#10003; Verified</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;    else if(status==='in progress') actionBtn=`<span class="badge badge-progress">&#9679; Submitted</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
-    else if(status==='new') actionBtn=`<span class="badge badge-new">&#10010; Submitted</span>`;
+    else if(status==='new') actionBtn=`<span class="badge badge-new">&#10010; New</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
     else if(status==='deleted') actionBtn=`<span class="badge badge-deleted">&#128465; Pending Deletion</span> <button class="verify-btn" style="background:#fff;color:#C0392B;border:1.5px solid #C0392B;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
     else actionBtn=`<button class="verify-btn" onclick="openVerifyModal(${p.id})">&#10003; Verify Now</button>`;
     return `<tr><td style="font-weight:600">${p.name}</td><td>${p.department}</td><td>${statusBadge(p.status)}</td><td style="color:#8899BB">${p.lastVerified||'Never'}</td><td style="color:#8899BB;font-size:12px">${p.owner||''}</td><td>${actionBtn}</td></tr>`;
