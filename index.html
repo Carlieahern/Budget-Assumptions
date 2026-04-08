@@ -1199,9 +1199,22 @@ function buildPMSCostBlock(yardiCost,onesiteCost,paceCost,disabled){
   return`<div class="pms-block"><div class="pms-item"><label class="pms-dna"><input type="checkbox" id="dna-yardi" onchange="handleDNA('yardi',this.checked)" ${d}> Does not apply to Yardi Properties</label><div class="field"><label>Yardi Cost <span class="req">*</span></label><textarea id="f-yardi-cost" placeholder="e.g., $1000/month..." ${d}>${esc(yardiCost)}</textarea></div></div><div class="pms-item"><label class="pms-dna"><input type="checkbox" id="dna-onesite" onchange="handleDNA('onesite',this.checked)" ${d}> Does not apply to OneSite Properties</label><div class="field"><label>OneSite Cost <span class="req">*</span></label><textarea id="f-onesite-cost" placeholder="e.g., $1000/month..." ${d}>${esc(onesiteCost)}</textarea></div></div><div class="pms-item"><label class="pms-dna"><input type="checkbox" id="dna-pace" onchange="handleDNA('pace',this.checked)" ${d}> Does not apply to Pace Properties</label><div class="field"><label>Pace Cost <span class="req">*</span></label><textarea id="f-pace-cost" placeholder="e.g., $1000/month..." ${d}>${esc(paceCost)}</textarea></div></div></div>`;
 }
 function handleDNA(system,checked){
-  const costField=document.getElementById('f-'+system+'-cost'); const glField=document.getElementById('f-'+system);
-  if(costField){costField.disabled=checked;if(checked)costField.value='Does not apply';else if(costField.value==='Does not apply')costField.value='';}
-  if(glField){glField.disabled=checked;if(checked){glField.value='N/A';glField.style.background='#F0F0F0';}else{glField.value='';glField.style.background='';}}
+  const costField=document.getElementById('f-'+system+'-cost');
+  const glField=document.getElementById('f-'+system);
+  if(costField){
+    costField.disabled=checked;
+    costField.style.background=checked?'#F0F0F0':'';
+    costField.style.color=checked?'#999':'#1A1A2E';
+    if(checked){costField.value='Does not apply';}
+    else{costField.value='';}
+  }
+  if(glField){
+    glField.disabled=checked;
+    glField.style.background=checked?'#F0F0F0':'';
+    glField.style.color=checked?'#999':'#1A1A2E';
+    if(checked){glField.value='N/A';}
+    else{glField.value='';}
+  }
 }
 function toggleCostDiffers(val){
   const block=document.getElementById('pms-cost-block'); const single=document.getElementById('single-cost-block');
