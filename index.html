@@ -1303,8 +1303,9 @@ async function submitForm() {
     type='Added Program'; mondayGroupKey='In Progress';
     requests.push({type:'New Program',program:newProg,submittedBy:owner,date:now,changes:[],mondayItemId:null,adminStatus:null});
     logActivity('Added Program', name, 'New program added for '+dept);
-  } else if(deleteReq){
+} else if(deleteReq){
     currentProgram.status='Deleted'; type='Delete Request'; mondayGroupKey='In Progress';
+    currentProgram.lastVerified=now;
     requests.push({type:'Delete Requested',program:currentProgram,submittedBy:owner,date:now,changes:[],mondayItemId:currentProgram.mondayItemId||null,adminStatus:null});
     logActivity('Delete Request', currentProgram.name, 'Deletion requested for '+currentProgram.department);
   } else {
