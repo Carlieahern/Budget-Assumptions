@@ -1436,18 +1436,16 @@ function viewProgramDetails(idx){
   function viewVerifiedDetails(progId) {
   const p = programs.find(pr => pr.id === progId);
   if (!p) return;
-  const hasDifferentCosts = p.costDiffers 
-  || p.yardiCost 
-  || p.onesiteCost 
-  || p.paceCost;
+  const costDiffers = p.costDiffers || (!p.costOfProgram && (p.yardiCost || p.onesiteCost || p.paceCost));
   const rows = [
     ['Program Name',p.name],['Department',p.department],['Program Owner',p.owner],
     ['Elective/Non-Elective',p.elective],['Last Verified',p.lastVerified||'Never'],
     ['─── Cost Details ───',''],
-    ['Cost of Program', p.costOfProgram||'—'],
-['Yardi Cost', hasDifferentCosts ? (p.yardiCost||'Does not apply') : ''],
-['OneSite Cost', hasDifferentCosts ? (p.onesiteCost||'Does not apply') : ''],
-['Pace Cost', hasDifferentCosts ? (p.paceCost||'Does not apply') : ''],
+    ...(!costDiffers ? [['Cost of Program', p.costOfProgram||'—']] : [
+      ['Yardi Cost', p.yardiCost||'Does not apply'],
+      ['OneSite Cost', p.onesiteCost||'Does not apply'],
+      ['Pace Cost', p.paceCost||'Does not apply'],
+    ]),
     ['Cost Basis',p.costBasis],['Billing Frequency',p.billingFrequency],
     ['Billing Start Month',p.billingStartMonth],['Minimum',p.minimum||'—'],['Maximum',p.maximum||'—'],
     ['─── GL Codes ───',''],['Yardi GL',p.yardiGL],['OneSite GL',p.onesiteGL],['Pace GL',p.paceGL],
