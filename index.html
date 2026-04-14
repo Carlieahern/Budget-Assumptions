@@ -1807,6 +1807,10 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 </div>
 
 <div class="main" id="app-main">
+  <div id="walkthrough-banner" style="background:#EFF6FF;border:1.5px solid #2D5BE3;border-radius:10px;padding:10px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;font-size:13px;">
+  <span>📹 <strong>New to the app?</strong> <a href="https://roscoeproperties.sharepoint.com/:v:/s/RealPageBudgeting/IQDtl0UE6lquSKQTQSd-cethAfvkKU80QKa2FSBNHTNAtx0?e=Qcb3QN" target="_blank" style="color:#2D5BE3;font-weight:600;text-decoration:underline;">Watch the walkthrough video</a> to get started.</span>
+  <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;cursor:pointer;font-size:16px;color:#888;margin-left:12px;">✕</button>
+</div>
   <div id="setup-notice" class="setup-notice" style="display:none">
     <strong>Monday.com not connected.</strong> Submissions will be saved locally only. <a href="#" onclick="openSettings();return false">Connect now &#8594;</a>
   </div>
