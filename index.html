@@ -1434,7 +1434,10 @@ function viewProgramDetails(idx){
   function viewVerifiedDetails(progId) {
   const p = programs.find(pr => pr.id === progId);
   if (!p) return;
-  const hasDifferentCosts = p.costDiffers || p.yardiCost || p.onesiteCost || p.paceCost || (!p.costOfProgram && (p.yardiCost === 'Does not apply' || p.onesiteCost === 'Does not apply' || p.paceCost === 'Does not apply'));
+  const hasDifferentCosts = p.costDiffers 
+  || p.yardiCost 
+  || p.onesiteCost 
+  || p.paceCost;
   const rows = [
     ['Program Name',p.name],['Department',p.department],['Program Owner',p.owner],
     ['Elective/Non-Elective',p.elective],['Last Verified',p.lastVerified||'Never'],
