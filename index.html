@@ -1298,8 +1298,11 @@ async function submitForm() {
     const newId=programs.length?Math.max(...programs.map(p=>p.id))+1:0;
     const newProg={
       id:newId,name,department:dept,owner,status:'New',lastVerified:'Never',elective,_isNew:true,
-      costOfProgram:cost,costDiffers:costDiffersVal==='Yes',yardiCost,onesiteCost,paceCost,
-      costBasis:basis,minimum:minV,maximum:maxV,yardiGL:yardi,onesiteGL:onesite,paceGL:pace,
+costOfProgram:costDiffersVal==='Yes'?'':cost,
+costDiffers:costDiffersVal==='Yes',
+yardiCost:costDiffersVal==='Yes'?(document.getElementById('dna-yardi')?.checked?'Does not apply':yardiCost):'',
+onesiteCost:costDiffersVal==='Yes'?(document.getElementById('dna-onesite')?.checked?'Does not apply':onesiteCost):'',
+paceCost:costDiffersVal==='Yes'?(document.getElementById('dna-pace')?.checked?'Does not apply':paceCost):'',      costBasis:basis,minimum:minV,maximum:maxV,yardiGL:yardi,onesiteGL:onesite,paceGL:pace,
       billingStartMonth:billMonth,billingFrequency:freq,details,hasSetupFee:hasSetup,
       setupFeeName:setupName,setupFeeCost:setupCost,setupFeeBasis:setupBasis,setupFeeMonth:setupMonth,
       setupFeeDescription:setupDesc,priorYearCost:'',mondayItemId:null
