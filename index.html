@@ -1435,7 +1435,11 @@ function viewProgramDetails(idx){
   const rows = [
     ['Program Name',p.name],['Department',p.department],['Program Owner',p.owner],
     ['Elective/Non-Elective',p.elective],['Last Verified',p.lastVerified||'Never'],
-    ['─── Cost Details ───',''],['Cost of Program',p.costOfProgram],
+    ['─── Cost Details ───',''],
+    ['Cost of Program', p.costDiffers ? '(Varies by system — see below)' : p.costOfProgram],
+    ['Yardi Cost', p.costDiffers ? (p.yardiCost||'Does not apply') : ''],
+    ['OneSite Cost', p.costDiffers ? (p.onesiteCost||'Does not apply') : ''],
+    ['Pace Cost', p.costDiffers ? (p.paceCost||'Does not apply') : ''],
     ['Cost Basis',p.costBasis],['Billing Frequency',p.billingFrequency],
     ['Billing Start Month',p.billingStartMonth],['Minimum',p.minimum||'—'],['Maximum',p.maximum||'—'],
     ['─── GL Codes ───',''],['Yardi GL',p.yardiGL],['OneSite GL',p.onesiteGL],['Pace GL',p.paceGL],
@@ -1444,7 +1448,7 @@ function viewProgramDetails(idx){
     ['Fee Basis',p.setupFeeBasis||'—'],['Fee Month',p.setupFeeMonth||'—'],
     ['─── Additional ───',''],['Details',p.details||'—'],
   ];
-  const rowsHtml = rows.map(([label,val]) => {
+  const rowsHtml = rows.filter(([,val]) => val !== '').map(([label,val]) => {
     if(label.startsWith('─')) return `<tr><td colspan="2" style="padding:8px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8899BB;background:#F8F9FC;border-bottom:1px solid #E8EEFF">${label.replace(/─/g,'').trim()}</td></tr>`;
     return `<tr style="border-bottom:1px solid #F0F2F7"><td style="padding:8px 12px;font-size:12px;font-weight:700;color:#555;width:45%;vertical-align:top">${label}</td><td style="padding:8px 12px;font-size:12px;color:#1A1A2E;white-space:pre-wrap">${val||'—'}</td></tr>`;
   }).join('');
