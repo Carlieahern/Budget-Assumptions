@@ -683,8 +683,10 @@ function renderProgramTable() {
   body.innerHTML=filtered.map(p=>{
     const status=(p.status||'').toLowerCase();
     let actionBtn;
-if(status==='verified') actionBtn=`<span class="badge badge-verified">&#10003; Verified - New</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
-    else if(status==='new - verified') actionBtn=`<span class="badge badge-new-verified">&#10010; New - Verified</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;  else if(status==='in progress') actionBtn=`<span class="badge badge-progress">&#9679; Submitted</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
+if(status==='verified') actionBtn=`<span class="badge badge-verified">&#10003; Verified</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
+    else if(status==='new - verified') actionBtn=`<span class="badge badge-new-verified">&#10010; New - Verified</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;  else if(status==='in progress') actionBtn= p._isNew
+  ? `<span class="badge badge-new">&#10010; New — Submitted</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`
+  : `<span class="badge badge-progress">&#9679; Submitted</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
     else if(status==='new') actionBtn=`<span class="badge badge-new">&#10010; New</span> <button class="verify-btn" style="background:#fff;color:#2D5BE3;border:1.5px solid #2D5BE3;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
     else if(status==='deleted') actionBtn=`<span class="badge badge-deleted">&#128465; Pending Deletion</span> <button class="verify-btn" style="background:#fff;color:#C0392B;border:1.5px solid #C0392B;margin-left:6px" onclick="viewVerifiedDetails(${p.id})">&#128203; View</button>`;
     else actionBtn=`<button class="verify-btn" onclick="openVerifyModal(${p.id})">&#10003; Verify Now</button>`;
@@ -1432,14 +1434,15 @@ function viewProgramDetails(idx){
   function viewVerifiedDetails(progId) {
   const p = programs.find(pr => pr.id === progId);
   if (!p) return;
+  const hasDifferentCosts = p.costDiffers || p.yardiCost || p.onesiteCost || p.paceCost;
   const rows = [
     ['Program Name',p.name],['Department',p.department],['Program Owner',p.owner],
     ['Elective/Non-Elective',p.elective],['Last Verified',p.lastVerified||'Never'],
     ['─── Cost Details ───',''],
-    ['Cost of Program', p.costDiffers ? '(Varies by system — see below)' : p.costOfProgram],
-    ['Yardi Cost', p.costDiffers ? (p.yardiCost||'Does not apply') : ''],
-    ['OneSite Cost', p.costDiffers ? (p.onesiteCost||'Does not apply') : ''],
-    ['Pace Cost', p.costDiffers ? (p.paceCost||'Does not apply') : ''],
+    ['Cost of Program', hasDifferentCosts ? '(Varies by system — see below)' : p.costOfProgram],
+    ['Yardi Cost', hasDifferentCosts ? (p.yardiCost||'Does not apply') : ''],
+    ['OneSite Cost', hasDifferentCosts ? (p.onesiteCost||'Does not apply') : ''],
+    ['Pace Cost', hasDifferentCosts ? (p.paceCost||'Does not apply') : ''],
     ['Cost Basis',p.costBasis],['Billing Frequency',p.billingFrequency],
     ['Billing Start Month',p.billingStartMonth],['Minimum',p.minimum||'—'],['Maximum',p.maximum||'—'],
     ['─── GL Codes ───',''],['Yardi GL',p.yardiGL],['OneSite GL',p.onesiteGL],['Pace GL',p.paceGL],
