@@ -1485,13 +1485,23 @@ async function approveRequest(idx){
   if(prog){
     prog.status = prog._isNew ? 'New - Verified' : 'Verified';
  prog.lastVerified=new Date().toLocaleDateString();
-    if(r.changes) r.changes.forEach(c=>{
+   if(r.changes) r.changes.forEach(c=>{
       if(c.label==='Cost of Program')prog.costOfProgram=c.new;
       if(c.label==='Cost Basis')prog.costBasis=c.new;
       if(c.label==='Billing Frequency')prog.billingFrequency=c.new;
+      if(c.label==='Billing Start Month')prog.billingStartMonth=c.new;
+      if(c.label==='Minimum')prog.minimum=c.new;
+      if(c.label==='Maximum')prog.maximum=c.new;
       if(c.label==='Yardi GL')prog.yardiGL=c.new;
       if(c.label==='OneSite GL')prog.onesiteGL=c.new;
       if(c.label==='Pace GL')prog.paceGL=c.new;
+      if(c.label==='Details')prog.details=c.new;
+      if(c.label==='Elective')prog.elective=c.new;
+      if(c.label==='Has Setup Fee')prog.hasSetupFee=c.new==='true';
+      if(c.label==='Setup Fee Name')prog.setupFeeName=c.new;
+      if(c.label==='Setup Fee Cost')prog.setupFeeCost=c.new;
+      if(c.label==='Setup Fee Basis')prog.setupFeeBasis=c.new;
+      if(c.label==='Setup Fee Month')prog.setupFeeMonth=c.new;
     });
     r.adminStatus='Approved';
     const s=getSettings();
