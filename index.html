@@ -808,8 +808,7 @@ function logoutUser() {
 function renderCompleted() {
   const container=document.getElementById('completed-list');
   if(!container) return;
-  const verified=programs.filter(p=>p.status==='Verified');
-  const allPrev=[...previous];
+const verified=programs.filter(p=>p.status==='Verified'||p.status==='New - Verified');  const allPrev=[...previous];
   if(!verified.length&&!allPrev.length){container.innerHTML='<div class="empty-state"><p>No completed or deleted programs yet</p></div>';return;}
   const verifiedHtml=verified.map(p=>`<div class="req-card" style="margin-bottom:8px">
     <div class="req-card-header">
