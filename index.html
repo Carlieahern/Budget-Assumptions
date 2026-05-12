@@ -1342,6 +1342,7 @@ if(costDiffersVal==='Yes'){
 } else {
   fieldMap.push(['Cost of Program',currentProgram.costOfProgram,cost]);
 }
+fieldMap.push(['Owner',currentProgram.owner||'',owner]);
     changes=fieldMap.filter(([,o,n])=>o!==n).map(([label,o,n])=>({label,old:o,new:n}));
     type=changes.length?'Verification + Updates':'Verification Confirmed';
 if(costDiffersVal==='Yes'){
@@ -1509,6 +1510,7 @@ async function approveRequest(idx){
       if(c.label==='Setup Fee Cost')prog.setupFeeCost=c.new;
       if(c.label==='Setup Fee Basis')prog.setupFeeBasis=c.new;
       if(c.label==='Setup Fee Month')prog.setupFeeMonth=c.new;
+      if(c.label==='Owner')prog.owner=c.new;
     });
     r.adminStatus='Approved';
     const s=getSettings();
