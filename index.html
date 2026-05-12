@@ -557,7 +557,7 @@ async function syncStatusesFromMonday() {
       prog.mondayItemId = item.id;
       const groupTitle = item.group?.title || '';
       if (DEPT_GROUPS.includes(groupTitle)) {
-        prog.status = prog.status === 'New' ? 'New' : 'Verified';
+        prog.status = (prog.status === 'New' || prog.status === 'New - Verified') ? prog.status : 'Verified';
         const dateCol = item.column_values.find(cv => cv.id === 'text_mm1vwgqc');
         if (dateCol?.text) prog.lastVerified = dateCol.text;
       } else if (groupTitle === 'In Progress') {
@@ -852,19 +852,21 @@ async function restoreDeleted(progId,progName) {
 }
 
 async function recallVerified(progId) {
-  if(!confirm('Move this program back to Needs Verification? It will be sent to the Reverify group in Monday.')) return;
+  if(!confirm('Move this program back to In Progress for review? You can recall it to Needs Verification from the admin panel.')) return;
   const prog=programs.find(p=>p.id===progId);
   if(!prog) return;
-  prog.status='Needs verification'; prog.lastVerified='Never';
+  prog.status='In Progress';
+  const now=new Date().toLocaleDateString();
   const s=getSettings();
   if(s.token&&s.boardId&&prog.mondayItemId){
     const groups=await getMondayGroups();
-    const reverifyId=groups['Reverify']||'group_mm20khgd';
-    await moveMondayItem(prog.mondayItemId,reverifyId);
+    const inProgressId=groups['In Progress']||'';
+    if(inProgressId) await moveMondayItem(prog.mondayItemId,inProgressId);
   }
-  logActivity('Admin Recalled Verified', prog.name, 'Recalled back to Needs Verification');
-  renderCompleted();renderDeptTabs();renderProgramTable();updateCounts();
-  showToast(prog.name+' moved back to Needs Verification');
+  requests.push({type:'Recalled for Review',program:prog,submittedBy:'Admin',date:now,changes:[],mondayItemId:prog.mondayItemId||null,adminStatus:null});
+  logActivity('Admin Recalled Verified', prog.name, 'Recalled from Verified — moved to In Progress');
+  renderCompleted();renderRequests();renderDeptTabs();renderProgramTable();updateCounts();
+  showToast(prog.name+' moved back to In Progress');
 }
 
 async function loadAdminQuestions() {
@@ -1232,7 +1234,7 @@ function buildVerifyForm(p){
   return`<div style="background:#F0F7FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:14px 18px;margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleQuestionBox()"><div style="font-size:13px;font-weight:700;color:#1B2A4A">&#128172; Message the Admin Team?</div><span id="question-toggle-icon" style="color:#2D5BE3;font-size:12px;font-weight:700">+ Add Message</span></div><div id="question-box" style="display:none;margin-top:12px"><textarea id="f-question-msg" placeholder="Type your question or note for the budget admin team here..." style="width:100%;padding:10px 12px;border:1.5px solid #BFDBFE;border-radius:8px;font-size:13px;font-family:Arial,sans-serif;min-height:80px;resize:vertical"></textarea></div></div>
   <div class="delete-warning"><label><input type="checkbox" id="delete-check" onchange="handleDeleteCheck(this.checked)"> &#128465; Delete this program — Check to request removal from the budget</label></div>
   <div class="section" id="section-basics"><div class="section-header" onclick="toggleSection('basics');updateGuide('basics')"><div><div class="section-title">&#128203; Program Basics</div><div class="section-sub">Essential program information</div></div><span id="section-icon-basics">&#9650;</span></div><div class="section-body open" id="section-body-basics">${buildAccuracyRow('basics')}<div style="background:#F0F7FF;border-left:4px solid #2D5BE3;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#1A1A2E;line-height:1.6">&#128204; Confirm the program name, department, and product manager email are still correct.</div><div id="fields-basics"><div class="field-group full" style="margin-bottom:12px"><div class="field"><label>Is this required?</label><div class="toggle-radio" style="margin-top:6px"><label><input type="radio" name="elective" value="Non-elective" ${p.elective==='Non-elective'?'checked':''}><span>Non-Elective</span></label><label><input type="radio" name="elective" value="Elective" ${p.elective==='Elective'?'checked':''}><span>Elective</span></label></div></div></div><div class="field-group"><div class="field"><label>Program Name</label><input id="f-name" value="${esc(p.name)}" disabled></div><div class="field"><label>Department</label><input id="f-dept" value="${esc(p.department)}" disabled></div></div><div class="field-group full"><div class="field"><label>Product Manager Email</label><input id="f-owner" value="${esc(p.owner)}" disabled></div></div></div></div></div>
-  <div class="section" id="section-cost"><div class="section-header" onclick="toggleSection('cost');updateGuide('cost')"><div><div class="section-title">&#128176; Cost Details</div><div class="section-sub">Pricing structure and limits</div></div><span id="section-icon-cost">&#9650;</span></div><div class="section-body open" id="section-body-cost">${buildAccuracyRow('cost')}<div id="fields-cost"><div class="toggle-row"><label>Is the cost different for Yardi, OneSite, or Pace?</label><div class="toggle-radio"><label><input type="radio" name="costDiffers" value="No" ${!cd?'checked':''} onchange="toggleCostDiffers('No')"><span>No</span></label><label><input type="radio" name="costDiffers" value="Yes" ${cd?'checked':''} onchange="toggleCostDiffers('Yes')"><span>Yes</span></label></div></div><div id="single-cost-block" style="${cd?'display:none':''}"><div class="field-group full"><div class="field"><label>Cost of Program</label><textarea id="f-cost" disabled>${esc(p.costOfProgram)}</textarea></div></div></div><div id="pms-cost-block" style="${cd?'':'display:none'}">${buildPMSCostBlock(p.yardiCost||'',p.onesiteCost||'',p.paceCost||'',false)}</div><div class="field-group"><div class="field"><label>Cost Basis</label><input id="f-basis" value="${esc(p.costBasis)}" disabled></div><div class="field"><label>Billing Frequency</label><input id="f-freq" value="${esc(p.billingFrequency)}" disabled></div></div><div class="field-group"><div class="field"><label>Minimum Cost</label><input id="f-min" value="${esc(p.minimum)}" disabled></div><div class="field"><label>Maximum Cost</label><input id="f-max" value="${esc(p.maximum)}" disabled></div></div><div class="field-group full"><div class="field"><label>Billing Start Month</label><input id="f-billmonth" value="${esc(p.billingStartMonth)}" disabled></div></div></div></div></div>
+  <div class="section" id="section-cost"><div class="section-header" onclick="toggleSection('cost');updateGuide('cost')"><div><div class="section-title">&#128176; Cost Details</div><div class="section-sub">Pricing structure and limits</div></div><span id="section-icon-cost">&#9650;</span></div><div class="section-body open" id="section-body-cost">${buildAccuracyRow('cost')}<div id="fields-cost"><div class="toggle-row"><label>Is the cost different for Yardi, OneSite, or Pace?</label><div class="toggle-radio"><label><input type="radio" name="costDiffers" value="No" ${!cd?'checked':''} onchange="toggleCostDiffers('No')"><span>No</span></label><label><input type="radio" name="costDiffers" value="Yes" ${cd?'checked':''} onchange="toggleCostDiffers('Yes')"><span>Yes</span></label></div></div><div id="single-cost-block" style="${cd?'display:none':''}"><div class="field-group full"><div class="field"><label>Cost of Program</label><textarea id="f-cost" disabled>${esc(p.costOfProgram)}</textarea></div></div></div><div id="pms-cost-block" style="${cd?'':'display:none'}">${buildPMSCostBlock(p.yardiCost||'',p.onesiteCost||'',p.paceCost||'',true)}</div><div class="field-group"><div class="field"><label>Cost Basis</label><input id="f-basis" value="${esc(p.costBasis)}" disabled></div><div class="field"><label>Billing Frequency</label><input id="f-freq" value="${esc(p.billingFrequency)}" disabled></div></div><div class="field-group"><div class="field"><label>Minimum Cost</label><input id="f-min" value="${esc(p.minimum)}" disabled></div><div class="field"><label>Maximum Cost</label><input id="f-max" value="${esc(p.maximum)}" disabled></div></div><div class="field-group full"><div class="field"><label>Billing Start Month</label><input id="f-billmonth" value="${esc(p.billingStartMonth)}" disabled></div></div></div></div></div>
   <div class="section" id="section-setup"><div class="section-header" onclick="toggleSection('setup');updateGuide('setup')"><div><div class="section-title">&#128295; Setup Fee</div><div class="section-sub">One-time setup costs</div></div><span id="section-icon-setup">&#9650;</span></div><div class="section-body open" id="section-body-setup">${buildAccuracyRow('setup')}<div id="fields-setup"><div class="toggle-row"><label>Has Setup Fee?</label><div class="toggle-radio"><label><input type="radio" name="hasSetup" value="No" ${!p.hasSetupFee?'checked':''} onchange="toggleSetupFeeFields(false)"><span>No</span></label><label><input type="radio" name="hasSetup" value="Yes" ${p.hasSetupFee?'checked':''} onchange="toggleSetupFeeFields(true)"><span>Yes</span></label></div></div><div id="setup-fee-fields" style="${p.hasSetupFee?'':'display:none'}"><div class="field-group"><div class="field"><label>Setup Fee Name <span class="req">*</span></label><input id="f-setup-name" value="${esc(p.setupFeeName)}" disabled></div><div class="field"><label>Setup Fee Cost <span class="req">*</span></label><input id="f-setup-cost" value="${esc(p.setupFeeCost)}" disabled></div></div><div class="field-group"><div class="field"><label>Cost Basis <span class="req">*</span></label><input id="f-setup-basis" value="${esc(p.setupFeeBasis||'')}" disabled></div><div class="field"><label>Billing Start Month <span class="req">*</span></label><input id="f-setup-month" value="${esc(p.setupFeeMonth||'')}" disabled></div></div><div class="field-group full"><div class="field"><label>Setup Fee Description</label><textarea id="f-setup-desc" disabled>${esc(p.setupFeeDescription)}</textarea></div></div></div></div></div></div>
   <div class="section" id="section-system"><div class="section-header" onclick="toggleSection('system');updateGuide('system')"><div><div class="section-title">&#128279; System Information</div><div class="section-sub">GL codes for each property management system</div></div><span id="section-icon-system">&#9650;</span></div><div class="section-body open" id="section-body-system">${buildAccuracyRow('system')}<div id="fields-system"><div class="field-group three"><div class="field"><label>Yardi GL Code ${glBtn('Yardi','f-yardi')}</label><input id="f-yardi" value="${esc(p.yardiGL)}" disabled></div><div class="field"><label>OneSite GL Code ${glBtn('OneSite','f-onesite')}</label><input id="f-onesite" value="${esc(p.onesiteGL)}" disabled></div><div class="field"><label>Pace GL Code ${glBtn('Pace','f-pace')}</label><input id="f-pace" value="${esc(p.paceGL)}" disabled></div></div></div></div></div>
   <div class="section" id="section-details"><div class="section-header" onclick="toggleSection('details');updateGuide('details')"><div><div class="section-title">&#128221; Additional Details</div><div class="section-sub">Program context and background</div></div><span id="section-icon-details">&#9650;</span></div><div class="section-body open" id="section-body-details">${buildAccuracyRow('details')}<div id="fields-details"><div class="field-group full"><div class="field"><label>Program Details</label><textarea id="f-details" disabled>${esc(p.details)}</textarea></div></div></div></div></div>`;
@@ -1317,7 +1319,6 @@ paceCost:costDiffersVal==='Yes'?(document.getElementById('dna-pace')?.checked?'D
     logActivity('Delete Request', currentProgram.name, 'Deletion requested for '+currentProgram.department);
   } else {
     const fieldMap=[
-  ['Cost of Program',currentProgram.costOfProgram,cost],
   ['Cost Basis',currentProgram.costBasis,basis],
   ['Billing Frequency',currentProgram.billingFrequency,freq],
   ['Billing Start Month',currentProgram.billingStartMonth,billMonth],
@@ -1334,8 +1335,14 @@ paceCost:costDiffersVal==='Yes'?(document.getElementById('dna-pace')?.checked?'D
   ['Minimum',currentProgram.minimum,minV],
   ['Maximum',currentProgram.maximum,maxV],
 ];
+if(costDiffersVal==='Yes'){
+  fieldMap.push(['Yardi Cost',currentProgram.yardiCost||'',yardiCost]);
+  fieldMap.push(['OneSite Cost',currentProgram.onesiteCost||'',onesiteCost]);
+  fieldMap.push(['Pace Cost',currentProgram.paceCost||'',paceCost]);
+} else {
+  fieldMap.push(['Cost of Program',currentProgram.costOfProgram,cost]);
+}
     changes=fieldMap.filter(([,o,n])=>o!==n).map(([label,o,n])=>({label,old:o,new:n}));
-    type=changes.length?'Verification + Updates':'Verification Confirmed';
     type=changes.length?'Verification + Updates':'Verification Confirmed';
 if(costDiffersVal==='Yes'){
   currentProgram.yardiCost = yardiCost;
@@ -1509,6 +1516,15 @@ async function approveRequest(idx){
       const groups=await getMondayGroups();
       const deptGroupId=groups[prog.department];
       if(deptGroupId) await moveMondayItem(r.mondayItemId,deptGroupId);
+      if(r.changes&&r.changes.length>0){
+        try{
+          const cols=await getBoardColumnIds();
+          const cv=buildColumnValues(cols,prog,'Verified','',r.changes);
+          const cleanCv={};
+          Object.entries(cv).forEach(([k,v])=>{if(v&&String(v).trim())cleanCv[k]=String(v).trim();});
+          if(Object.keys(cleanCv).length>0) await mondayQuery(`mutation { change_multiple_column_values(board_id: ${s.boardId}, item_id: ${r.mondayItemId}, column_values: ${JSON.stringify(JSON.stringify(cleanCv))}) { id } }`);
+        }catch(e){}
+      }
     }
     logActivity('Admin Approved', prog.name, 'Approved by admin — marked Verified');
   }
@@ -1544,11 +1560,18 @@ async function adminRecall(idx){
   const prog=programs.find(p=>p.id===r.program.id);
   if(prog) prog.status='Needs verification';
   const s=getSettings();
-  if(s.token&&r.mondayItemId) await deleteMondayItem(r.mondayItemId);
+  if(s.token&&s.boardId&&r.mondayItemId){
+    const groups=await getMondayGroups();
+    const reverifyId=groups['Reverify']||'group_mm20khgd';
+    await moveMondayItem(r.mondayItemId,reverifyId);
+    if(prog) prog.mondayItemId=r.mondayItemId;
+  } else if(prog){
+    prog.mondayItemId=null;
+  }
   logActivity('Admin Recalled', r.program.name, 'Request recalled — reset to Needs Verification');
   requests.splice(idx,1);
   renderRequests();renderProgramTable();renderDeptTabs();updateCounts();
-  showToast('Recalled — program reset and removed from Monday');
+  showToast('Recalled — program moved to Reverify in Monday');
 }
 
 function rejectRequest(idx){
