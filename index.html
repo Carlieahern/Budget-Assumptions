@@ -1319,28 +1319,32 @@ paceCost:costDiffersVal==='Yes'?(document.getElementById('dna-pace')?.checked?'D
     logActivity('Delete Request', currentProgram.name, 'Deletion requested for '+currentProgram.department);
   } else {
     const fieldMap=[
-  ['Cost Basis',currentProgram.costBasis,basis],
-  ['Billing Frequency',currentProgram.billingFrequency,freq],
-  ['Billing Start Month',currentProgram.billingStartMonth,billMonth],
-  ['Yardi GL',currentProgram.yardiGL,yardi],
-  ['OneSite GL',currentProgram.onesiteGL,onesite],
-  ['Pace GL',currentProgram.paceGL,pace],
-  ['Details',currentProgram.details,details],
+  ['Name',currentProgram.name||'',name],
+  ['Department',currentProgram.department||'',dept],
+  ['Owner',currentProgram.owner||'',owner],
+  ['Elective',currentProgram.elective||'',elective],
+  ['Cost Basis',currentProgram.costBasis||'',basis],
+  ['Billing Frequency',currentProgram.billingFrequency||'',freq],
+  ['Billing Start Month',currentProgram.billingStartMonth||'',billMonth],
+  ['Minimum',currentProgram.minimum||'',minV],
+  ['Maximum',currentProgram.maximum||'',maxV],
+  ['Yardi GL',currentProgram.yardiGL||'',yardi],
+  ['OneSite GL',currentProgram.onesiteGL||'',onesite],
+  ['Pace GL',currentProgram.paceGL||'',pace],
+  ['Details',currentProgram.details||'',details],
   ['Has Setup Fee',String(currentProgram.hasSetupFee),String(hasSetup)],
-  ['Setup Fee Name',currentProgram.setupFeeName,setupName],
-  ['Setup Fee Cost',currentProgram.setupFeeCost,setupCost],
-  ['Setup Fee Basis',currentProgram.setupFeeBasis,setupBasis],
-  ['Setup Fee Month',currentProgram.setupFeeMonth,setupMonth],
-  ['Elective',currentProgram.elective,elective],
-  ['Minimum',currentProgram.minimum,minV],
-  ['Maximum',currentProgram.maximum,maxV],
+  ['Setup Fee Name',currentProgram.setupFeeName||'',setupName],
+  ['Setup Fee Cost',currentProgram.setupFeeCost||'',setupCost],
+  ['Setup Fee Basis',currentProgram.setupFeeBasis||'',setupBasis],
+  ['Setup Fee Month',currentProgram.setupFeeMonth||'',setupMonth],
+  ['Setup Fee Description',currentProgram.setupFeeDescription||'',setupDesc],
 ];
 if(costDiffersVal==='Yes'){
   fieldMap.push(['Yardi Cost',currentProgram.yardiCost||'',yardiCost]);
   fieldMap.push(['OneSite Cost',currentProgram.onesiteCost||'',onesiteCost]);
   fieldMap.push(['Pace Cost',currentProgram.paceCost||'',paceCost]);
 } else {
-  fieldMap.push(['Cost of Program',currentProgram.costOfProgram,cost]);
+  fieldMap.push(['Cost of Program',currentProgram.costOfProgram||'',cost]);
 }
     changes=fieldMap.filter(([,o,n])=>o!==n).map(([label,o,n])=>({label,old:o,new:n}));
     type=changes.length?'Verification + Updates':'Verification Confirmed';
@@ -1509,6 +1513,13 @@ async function approveRequest(idx){
       if(c.label==='Setup Fee Cost')prog.setupFeeCost=c.new;
       if(c.label==='Setup Fee Basis')prog.setupFeeBasis=c.new;
       if(c.label==='Setup Fee Month')prog.setupFeeMonth=c.new;
+      if(c.label==='Setup Fee Description')prog.setupFeeDescription=c.new;
+      if(c.label==='Name')prog.name=c.new;
+      if(c.label==='Department')prog.department=c.new;
+      if(c.label==='Owner')prog.owner=c.new;
+      if(c.label==='Yardi Cost')prog.yardiCost=c.new;
+      if(c.label==='OneSite Cost')prog.onesiteCost=c.new;
+      if(c.label==='Pace Cost')prog.paceCost=c.new;
     });
     r.adminStatus='Approved';
     const s=getSettings();
